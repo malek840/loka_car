@@ -1,0 +1,430 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Loka Cars — معرض السيارات الرياضية</title>
+<link rel="shortcut icon" href="lo.jpg" type="image/x-icon">
+<style>
+/* Reset */
+* { box-sizing: border-box; margin:0; padding:0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+body { background-color: #1e1e1e; color: #fff; overflow-x: hidden; }
+/* Splash Screen */
+#splashScreen { position: fixed; top:0; left:0; width:100%; height:100%; background:#1c1c1c; display:flex; justify-content:center; align-items:center; flex-direction:column; z-index:1000; }
+#logoCanvas { width:300px; height:300px; }
+#loginButton { margin-top:20px; padding:15px 30px; font-size:20px; background:#ff4500; color:#fff; border:none; border-radius:10px; cursor:pointer; transition: background 0.3s; }
+#loginButton:hover { background:#ff6347; }
+/* Main Content */
+#mainContent { display:none; padding:20px; flex-wrap: wrap; justify-content:center; gap:20px; display:flex; opacity:0; transition: opacity 1s ease; }
+#mainContent.fade-in { opacity:1; }
+.car-card { background-color: #2a2a2a; border-radius: 15px; padding:15px; width: 300px; transition: transform 0.3s, box-shadow 0.3s; }
+.car-card:hover { transform: scale(1.05); box-shadow: 0 0 20px #ff6347; }
+.car-card img { width:100%; border-radius:10px; }
+.car-card h2 { margin:10px 0; font-size:24px; }
+.car-card p { margin:5px 0; font-size:18px; color:#ffa500; }
+.car-card button { margin-top:10px; padding:10px 20px; border:none; background-color:#ff4500; color:#fff; font-size:18px; border-radius:10px; cursor:pointer; transition: background 0.3s; }
+.car-card button:hover { background-color:#ff6347; }
+/* Cart Button */
+#cartButton { position:fixed; bottom:30px; right:30px; background:#ff4500; color:#fff; padding:15px 25px; border-radius:50px; border:none; cursor:pointer; font-size:18px; box-shadow: 0 0 20px rgba(255,69,0,0.5); transition: all 0.3s; z-index:100; }
+#cartButton:hover { background:#ff6347; transform: scale(1.1); }
+.cart-badge { position:absolute; top:-5px; right:-5px; background:#ff0000; color:#fff; border-radius:50%; width:25px; height:25px; display:flex; justify-content:center; align-items:center; font-weight:bold; }
+/* Shopping Cart */
+#shoppingCart { display:none; position:fixed; top:0; right:0; width:350px; height:100%; background:#2a2a2a; box-shadow: -5px 0 20px rgba(0,0,0,0.8); z-index:999; overflow-y:auto; padding:20px; }
+#shoppingCart.open { display:block; }
+#cartHeader { display:flex; justify-content:space-between; align-items:center; margin-bottom:20px; border-bottom:2px solid #ff4500; padding-bottom:10px; }
+#cartHeader h2 { font-size:24px; color:#ff4500; }
+#closeCart { background:#ff4500; color:#fff; border:none; padding:8px 15px; cursor:pointer; border-radius:5px; }
+.cart-item { background:#1c1c1c; padding:15px; margin-bottom:10px; border-radius:10px; display:flex; flex-direction:column; gap:10px; }
+.cart-item-info { display:flex; justify-content:space-between; align-items:center; }
+.cart-item-name { font-size:16px; font-weight:bold; }
+.cart-item-price { color:#ff4500; font-weight:bold; }
+.remove-btn { background:#ff0000; color:#fff; border:none; padding:5px 12px; cursor:pointer; border-radius:5px; font-size:14px; }
+.remove-btn:hover { background:#cc0000; }
+#cartTotal { padding:15px; background:#ff4500; border-radius:10px; text-align:center; font-size:18px; font-weight:bold; margin-bottom:10px; }
+#checkoutBtn { width:100%; padding:12px; background:#00a651; color:#fff; border:none; cursor:pointer; font-size:16px; border-radius:10px; transition: background 0.3s; font-weight:bold; }
+#checkoutBtn:hover { background:#009a47; }
+#deleteCartBtn { width:100%; padding:12px; background:#ff0000; color:#fff; border:none; cursor:pointer; font-size:16px; border-radius:10px; margin-top:10px; transition: background 0.3s; font-weight:bold; }
+#deleteCartBtn:hover { background:#cc0000; }
+/* Purchase Form */
+#purchaseFormContainer { display:none; position:fixed; top:0; left:0; width:100%; height:100%; background: rgba(0,0,0,0.85); justify-content:center; align-items:center; z-index:1500; }
+#purchaseForm { background:#2a2a2a; padding:30px; border-radius:15px; text-align:center; width:90%; max-width:500px; }
+#purchaseForm h2 { color:#ff4500; margin-bottom:20px; font-size:24px; }
+#purchaseForm input { padding:10px; width:100%; margin:10px 0; border-radius:10px; border:none; font-size:16px; }
+#purchaseForm button { padding:12px 25px; font-size:16px; border:none; border-radius:10px; background:#ff4500; color:#fff; cursor:pointer; margin-top:10px; transition: background 0.3s; }
+#purchaseForm button:hover { background:#ff6347; }
+#closePurchaseForm { background:#ff0000; }
+#closePurchaseForm:hover { background:#cc0000; }
+/* Ownership Document */
+#ownershipDoc { display:none; position:fixed; top:50%; left:50%; transform:translate(-50%,-50%); background:#fff; padding:50px; border-radius:5px; width:550px; box-shadow: 0 0 50px rgba(0,0,0,0.8); z-index:2000; overflow-y:auto; max-height:90vh; }
+.doc-header { text-align:center; border-bottom:3px solid #d4af37; padding-bottom:20px; margin-bottom:20px; }
+.doc-header h1 { color:#000; font-size:32px; font-weight:bold; letter-spacing:2px; }
+.doc-header p { color:#666; font-size:14px; margin-top:5px; }
+.doc-content { color:#000; }
+.doc-row { display:flex; justify-content:space-between; padding:15px; border-bottom:1px solid #ddd; font-size:16px; }
+.doc-label { font-weight:bold; color:#333; }
+.doc-value { color:#000; }
+.doc-items { background:#f5f5f5; padding:20px; border-radius:5px; margin:20px 0; }
+.doc-item { padding:10px; border-bottom:1px solid #ddd; display:flex; justify-content:space-between; }
+.doc-item:last-child { border-bottom:none; }
+.doc-total { background:#d4af37; color:#000; padding:15px; font-weight:bold; font-size:18px; text-align:center; border-radius:5px; margin-top:20px; }
+#documentCanvas { width:100%; border:1px solid #999; }
+.doc-buttons { display:flex; gap:10px; margin-top:20px; }
+.doc-buttons button { flex:1; padding:12px; font-size:16px; border:none; cursor:pointer; border-radius:5px; font-weight:bold; }
+#completePurchase { background:#00a651; color:#fff; }
+#completePurchase:hover { background:#009a47; }
+#closeDoc { background:#ff4500; color:#fff; }
+#closeDoc:hover { background:#ff6347; }
+</style>
+</head>
+<body>
+<div id="splashScreen">
+<canvas id="logoCanvas" width="300" height="300"></canvas>
+<button id="loginButton">تسجيل دخول</button>
+</div>
+
+<div id="mainContent"></div>
+
+<!-- Shopping Cart -->
+<div id="shoppingCart">
+<div id="cartHeader">
+<h2>🛒 سلتك</h2>
+<button id="closeCart">إغلاق</button>
+</div>
+<div id="cartItems"></div>
+<div id="cartTotal">الإجمالي: $0</div>
+<button id="checkoutBtn">إتمام الشراء</button>
+<button id="deleteCartBtn">حذف السلة</button>
+</div>
+
+<!-- Cart Button -->
+<button id="cartButton">
+🛒 سلتي
+<span class="cart-badge">0</span>
+</button>
+
+<!-- Purchase Form -->
+<div id="purchaseFormContainer">
+<div id="purchaseForm">
+<h2>بيانات المشتري</h2>
+<input type="text" id="ownerName" placeholder="اسمك الكامل">
+<input type="email" id="ownerEmail" placeholder="بريدك الإلكتروني">
+<input type="tel" id="ownerPhone" placeholder="رقم هاتفك">
+<input type="text" id="ownerCity" placeholder="مدينتك">
+<button id="confirmPurchase">التالي</button>
+<button id="closePurchaseForm">إلغاء</button>
+</div>
+</div>
+
+<!-- Ownership Document -->
+<div id="ownershipDoc">
+<div class="doc-header">
+<h1>شهادة ملكية السيارة</h1>
+<p>Car Ownership Certificate</p>
+</div>
+<div class="doc-content">
+<div class="doc-row">
+<span class="doc-label">رقم الشهادة:</span>
+<span class="doc-value" id="docNumber"></span>
+</div>
+<div class="doc-row">
+<span class="doc-label">التاريخ:</span>
+<span class="doc-value" id="docDate"></span>
+</div>
+<div class="doc-row">
+<span class="doc-label">اسم المالك:</span>
+<span class="doc-value" id="docOwnerName"></span>
+</div>
+<div class="doc-row">
+<span class="doc-label">البريد الإلكتروني:</span>
+<span class="doc-value" id="docOwnerEmail"></span>
+</div>
+<div class="doc-row">
+<span class="doc-label">رقم الهاتف:</span>
+<span class="doc-value" id="docOwnerPhone"></span>
+</div>
+
+<div class="doc-items">
+<h3 style="color:#000; margin-bottom:10px;">السيارات المشتراة:</h3>
+<div id="docCarsList"></div>
+</div>
+
+<div class="doc-total">
+الإجمالي: <span id="docTotalPrice">$0</span>
+</div>
+</div>
+
+<div class="doc-buttons">
+<button id="completePurchase">إتمام الشراء والإرسال</button>
+<button id="closeDoc">إغلاق</button>
+</div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<script>
+// --- Canvas Flame Animation for Logo ---
+const canvas = document.getElementById('logoCanvas');
+const ctx = canvas.getContext('2d');
+const particles = [];
+function random(min,max){ return Math.random()*(max-min)+min; }
+function createParticle(){ particles.push({ x: canvas.width/2 + random(-20,20), y: canvas.height/2 + random(-20,20), vx: random(-1,1), vy: random(-3,-1), alpha:1, size: random(2,5) }); }
+function animate(){ ctx.clearRect(0,0,canvas.width,canvas.height); for(let i=0;i<5;i++) createParticle(); for(let i=0;i<particles.length;i++){ const p = particles[i]; p.x += p.vx; p.y += p.vy; p.alpha -=0.02; p.size *=0.96; ctx.fillStyle = `rgba(255,69,0,${p.alpha})`; ctx.beginPath(); ctx.arc(p.x,p.y,p.size,0,Math.PI*2); ctx.fill(); } for(let i=particles.length-1;i>=0;i--){ if(particles[i].alpha<=0) particles.splice(i,1); } requestAnimationFrame(animate); }
+animate();
+
+// --- Car Gallery Data ---
+const cars = [
+{name:'Ferrari SF90', price:'$500,000', img:'image.png'},
+{name:'Lamborghini Aventador', price:'$450,000', img:'image copy.png'},
+{name:'Porsche 911', price:'$200,000', img:'image copy 2.png'},
+{name:'Bugatti Chiron', price:'$3,000,000', img:'image copy 3.png'},
+{name:'McLaren 720S', price:'$300,000', img:'image copy 4.png'},
+{name:'Aston Martin DBS', price:'$330,000', img:'image copy 5.png'},
+{name:'Ferrari 488', price:'$250,000', img:'image copy 6.png'},
+{name:'Lamborghini Huracan', price:'$240,000', img:'image copy 7.png'},
+{name:'Porsche Taycan', price:'$150,000', img:'image copy 8.png'},
+{name:'Chevrolet Corvette', price:'$70,000', img:'image copy 9.png'},
+{name:'Ford GT', price:'$500,000', img:'image copy 10.png'},
+{name:'Nissan GT-R', price:'$113,000', img:'image copy 11.png'},
+{name:'BMW i8', price:'$150,000', img:'image copy 12.png'},
+{name:'Mercedes AMG GT', price:'$160,000', img:'image copy 13.png'},
+{name:'Audi R8', price:'$170,000', img:'image copy 14.png'},
+{name:'Jaguar F-Type', price:'$80,000', img:'image copy 15.png'},
+{name:'Maserati GranTurismo', price:'$140,000', img:'image copy 16.png'},
+{name:'Tesla Roadster', price:'$200,000', img:'image copy 17.png'},
+{name:'Koenigsegg Agera', price:'$2,500,000', img:'image copy 18.png'},
+{name:'Pagani Huayra', price:'$2,600,000', img:'image copy 19.png'},
+{name:'Lexus LFA', price:'$375,000', img:'image copy 20.png'},
+{name:'Honda NSX', price:'$157,000', img:'image copy 21.png'},
+{name:'Subaru BRZ', price:'$30,000', img:'image copy 22.png'},
+{name:'Toyota Supra', price:'$50,000', img:'image copy 23.png'},
+{name:'Ford Mustang', price:'$40,000', img:'image copy 24.png'},
+{name:'Chevrolet Camaro', price:'$42,000', img:'image copy 25.png'},
+{name:'Dodge Viper', price:'$90,000', img:'image copy 26.png'}
+];
+
+// --- Shopping Cart Management ---
+let cart = [];
+const cartButton = document.getElementById('cartButton');
+const shoppingCart = document.getElementById('shoppingCart');
+const cartItemsDiv = document.getElementById('cartItems');
+const closeCartBtn = document.getElementById('closeCart');
+const deleteCartBtn = document.getElementById('deleteCartBtn');
+const checkoutBtn = document.getElementById('checkoutBtn');
+const cartBadge = cartButton.querySelector('.cart-badge');
+const cartTotalDiv = document.getElementById('cartTotal');
+
+function getPrice(priceStr) {
+  return parseInt(priceStr.replace(/[^0-9]/g, ''));
+}
+
+function updateCartDisplay() {
+  cartItemsDiv.innerHTML = '';
+  let total = 0;
+  
+  cart.forEach((item, index) => {
+    const price = getPrice(item.price);
+    total += price;
+    const cartItem = document.createElement('div');
+    cartItem.className = 'cart-item';
+    cartItem.innerHTML = `
+      <div class="cart-item-info">
+        <span class="cart-item-name">${item.name}</span>
+        <span class="cart-item-price">${item.price}</span>
+      </div>
+      <button class="remove-btn" onclick="removeFromCart(${index})">حذف</button>
+    `;
+    cartItemsDiv.appendChild(cartItem);
+  });
+  
+  cartTotalDiv.textContent = `الإجمالي: $${total.toLocaleString()}`;
+  cartBadge.textContent = cart.length;
+}
+
+function removeFromCart(index) {
+  cart.splice(index, 1);
+  updateCartDisplay();
+}
+
+function addToCart(index) {
+  cart.push(cars[index]);
+  updateCartDisplay();
+}
+
+cartButton.addEventListener('click', () => {
+  shoppingCart.classList.toggle('open');
+});
+
+closeCartBtn.addEventListener('click', () => {
+  shoppingCart.classList.remove('open');
+});
+
+deleteCartBtn.addEventListener('click', () => {
+  if(confirm('هل تريد حذف جميع السيارات من السلة؟')) {
+    cart = [];
+    updateCartDisplay();
+    shoppingCart.classList.remove('open');
+  }
+});
+
+checkoutBtn.addEventListener('click', () => {
+  if(cart.length === 0) {
+    alert('السلة فارغة! أضف سيارات أولاً');
+    return;
+  }
+  shoppingCart.classList.remove('open');
+  document.getElementById('purchaseFormContainer').style.display = 'flex';
+});
+
+// --- Generate Car Gallery ---
+const mainContent = document.getElementById('mainContent');
+cars.forEach((car, index) => {
+  const card = document.createElement('div');
+  card.className = 'car-card';
+  card.innerHTML = `
+    <img src="${car.img}" alt="${car.name}">
+    <h2>${car.name}</h2>
+    <p>${car.price}</p>
+    <button data-index="${index}" onclick="addToCart(${index})">أضف للسلة</button>
+  `;
+  mainContent.appendChild(card);
+});
+
+// --- Splash Screen Login ---
+const splashScreen = document.getElementById('splashScreen');
+const loginButton = document.getElementById('loginButton');
+loginButton.addEventListener('click', () => {
+  splashScreen.style.display = 'none';
+  mainContent.style.display = 'flex';
+  setTimeout(() => { mainContent.classList.add('fade-in'); }, 50);
+});
+
+// --- Purchase System ---
+const purchaseFormContainer = document.getElementById('purchaseFormContainer');
+const confirmPurchase = document.getElementById('confirmPurchase');
+const closePurchaseForm = document.getElementById('closePurchaseForm');
+const ownerNameInput = document.getElementById('ownerName');
+const ownerEmailInput = document.getElementById('ownerEmail');
+const ownerPhoneInput = document.getElementById('ownerPhone');
+const ownerCityInput = document.getElementById('ownerCity');
+const ownershipDoc = document.getElementById('ownershipDoc');
+const completePurchase = document.getElementById('completePurchase');
+const closeDoc = document.getElementById('closeDoc');
+
+closePurchaseForm.addEventListener('click', () => {
+  purchaseFormContainer.style.display = 'none';
+});
+
+confirmPurchase.addEventListener('click', () => {
+  const name = ownerNameInput.value.trim();
+  const email = ownerEmailInput.value.trim();
+  const phone = ownerPhoneInput.value.trim();
+  const city = ownerCityInput.value.trim();
+  
+  if(!name || !email || !phone || !city) {
+    alert('يرجى ملء جميع البيانات');
+    return;
+  }
+  
+  // Generate document
+  const today = new Date();
+  const docNumber = 'LOK-' + Math.random().toString(36).substr(2, 9).toUpperCase();
+  const docDate = today.toLocaleDateString('ar-EG');
+  
+  document.getElementById('docNumber').textContent = docNumber;
+  document.getElementById('docDate').textContent = docDate;
+  document.getElementById('docOwnerName').textContent = name;
+  document.getElementById('docOwnerEmail').textContent = email;
+  document.getElementById('docOwnerPhone').textContent = phone;
+  
+  // Add cars to document
+  const carsList = document.getElementById('docCarsList');
+  carsList.innerHTML = '';
+  let total = 0;
+  
+  cart.forEach(car => {
+    const price = getPrice(car.price);
+    total += price;
+    const item = document.createElement('div');
+    item.className = 'doc-item';
+    item.innerHTML = `
+      <span>${car.name}</span>
+      <span>${car.price}</span>
+    `;
+    carsList.appendChild(item);
+  });
+  
+  document.getElementById('docTotalPrice').textContent = '$' + total.toLocaleString();
+  
+  purchaseFormContainer.style.display = 'none';
+  ownershipDoc.style.display = 'block';
+});
+
+closeDoc.addEventListener('click', () => {
+  ownershipDoc.style.display = 'none';
+});
+
+completePurchase.addEventListener('click', () => {
+  const name = ownerNameInput.value;
+  const phone = ownerPhoneInput.value;
+  
+  // Generate document as image
+  html2canvas(document.querySelector('.doc-header, .doc-content'), { 
+    backgroundColor: '#ffffff',
+    scale: 2 
+  }).then(canvas => {
+    const imgData = canvas.toDataURL('image/png');
+    
+    // Prepare message for WhatsApp
+    let message = `🚗 *طلب شراء سيارات جديد* 🚗\n\n`;
+    message += `👤 الاسم: ${name}\n`;
+    message += `📧 البريد: ${ownerEmailInput.value}\n`;
+    message += `📞 الهاتف: ${phone}\n`;
+    message += `🏙️ المدينة: ${ownerCityInput.value}\n\n`;
+    message += `*السيارات المشتراة:*\n`;
+    
+    let total = 0;
+    cart.forEach(car => {
+      const price = getPrice(car.price);
+      total += price;
+      message += `✓ ${car.name} - ${car.price}\n`;
+    });
+    
+    message += `\n💰 *الإجمالي: $${total.toLocaleString()}*\n\n`;
+    message += `شهادة الملكية مرفقة أعلاه`;
+    
+    // Send to WhatsApp
+    const whatsappUrl = `https://wa.me/201097074813?text=${encodeURIComponent(message)}`;
+    
+    // Create download link
+    const link = document.createElement('a');
+    link.href = imgData;
+    link.download = 'ownership-certificate.png';
+    
+    // Open WhatsApp and trigger download
+    window.open(whatsappUrl, '_blank');
+    setTimeout(() => {
+      link.click();
+      
+      // Clear form and cart
+      setTimeout(() => {
+        cart = [];
+        ownerNameInput.value = '';
+        ownerEmailInput.value = '';
+        ownerPhoneInput.value = '';
+        ownerCityInput.value = '';
+        updateCartDisplay();
+        ownershipDoc.style.display = 'none';
+        alert('تم إرسال الطلب على WhatsApp بنجاح! 🎉\n\nشهادة الملكية جاهزة للتحميل');
+      }, 1000);
+    }, 500);
+  }).catch(err => {
+    console.error('Error generating image:', err);
+    // Fallback message
+    const whatsappUrl = `https://wa.me/201097074813?text=${encodeURIComponent('لدي استفسار حول شراء سيارة')}`;
+    window.open(whatsappUrl, '_blank');
+  });
+});
+
+</script>
+</body>
+</html>
